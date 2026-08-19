@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SA_PHYHBTU</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0c0e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SA_PHYHBTU">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0c0e;
+    --app:#151619;
+    --app-border:#232428;
+    --display:#101113;
+    --key-fn:#2a2c30;
+    --key-fn-fg:#e8e9eb;
+    --key-num:#1f2124;
+    --key-num-fg:#f2f3f5;
+    --key-num-hover:#2a2d31;
+    --accent:#f5c451;
+    --accent-fg:#171812;
+    --muted:#8a8d93;
+    --muted-2:#5c5f66;
+    --divider:#232428;
+    --sheet-fg:#f2f3f5;
+    --overlay:rgba(10,10,11,0.88);
+  }
+  body.light{
+    --bg:#e9eaec; --app:#ffffff; --app-border:#e1e2e5; --display:#f4f5f6;
+    --key-fn:#e7e8ea; --key-fn-fg:#26282b; --key-num:#f1f2f3; --key-num-fg:#1b1c1e;
+    --key-num-hover:#e5e6e8; --accent:#c8892a; --accent-fg:#ffffff;
+    --muted:#6c6f75; --muted-2:#9a9da3; --divider:#eceded; --sheet-fg:#1b1c1e;
+    --overlay:rgba(255,255,255,0.92);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html, body{ height:100%; }
+  body{
+    margin:0;
+    background:radial-gradient(circle at 50% -10%, #1c1d21 0%, var(--bg) 55%);
+    font-family:'Inter', sans-serif;
+    color:var(--sheet-fg);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:14px;
+    overflow:hidden;
+    transition:background .2s ease, color .2s ease;
+  }
+  body.light{ background:var(--bg); }
+
+  .app{
+    position:relative;
+    width:100%;
+    max-width:360px;
+    height:min(690px, 96vh);
+    background:var(--app);
+    border:1px solid var(--app-border);
+    border-radius:26px;
+    padding:16px 16px 18px;
+    box-shadow:0 30px 60px -25px rgba(0,0,0,0.6);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex:0 0 auto; }
+  .icon-btn{
+    width:32px; height:32px; border-radius:10px;
+    background:var(--key-fn); border:none; color:var(--key-fn-fg);
+    font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .icon-btn:hover{ background:var(--key-num-hover); }
+  .icon-btn:active{ transform:scale(0.92); }
+
+  .qty-select{
+    flex:1; margin:0 8px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--key-fn); border:none; border-radius:10px;
+    padding:0 10px; height:32px; cursor:pointer;
+    color:var(--sheet-fg); font-size:12.5px; font-weight:600;
+    font-family:'Inter', sans-serif;
+  }
+  .qty-select .chev{ color:var(--muted); font-size:11px; }
+
+  .display{
+    background:var(--display);
+    border-radius:16px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    flex:0 0 auto;
+  }
+  .disp-row1{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:4px;
+  }
+  .disp-row1 .arrow-badge{
+    display:flex; align-items:center; gap:5px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--muted);
+  }
+  .swap-icon-btn{
+    background:none; border:none; color:var(--accent);
+    font-size:15px; cursor:pointer; padding:2px 4px;
+    transition:transform .2s ease;
+  }
+  .swap-icon-btn.spin{ transform:rotate(180deg); }
+
+  .disp-input-line{
+    font-family:'JetBrains Mono', monospace;
+    font-size:15px; color:var(--muted); text-align:right;
+    margin-bottom:2px; min-height:18px; word-break:break-all;
+  }
+  .disp-result-line{
+    display:flex; align-items:baseline; justify-content:flex-end; gap:6px;
+    font-family:'JetBrains Mono', monospace;
+    font-weight:700; font-size:32px; text-align:right;
+    line-height:1.1; flex-wrap:wrap;
+  }
+  .disp-result-line .unit{ font-size:14px; font-weight:500; color:var(--muted); }
+
+  .keypad{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    grid-template-rows:repeat(5, 1fr);
+    gap:7px;
+    flex:1 1 auto;
+    min-height:0;
+  }
+  .key{
+    border-radius:13px;
+    border:none;
+    font-family:'JetBrains Mono', monospace;
+    font-size:17px;
+    font-weight:500;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--key-num);
+    color:var(--key-num-fg);
+    transition:background .1s ease, transform .08s ease;
+  }
+  .key:hover{ background:var(--key-num-hover); }
+  .key:active{ transform:scale(0.94); }
+  .key.fn{ background:var(--key-fn); color:var(--key-fn-fg); font-size:15px; }
+  .key.accent{ background:var(--accent); color:var(--accent-fg); font-weight:700; }
+  .key.wide{ grid-column:span 2; }
+  .key.dim{ color:var(--muted); }
+
+  /* Overlay drawer */
+  .drawer{
+    position:absolute; inset:0;
+    background:var(--overlay);
+    backdrop-filter:blur(6px);
+    border-radius:26px;
+    display:flex; flex-direction:column;
+    opacity:0; pointer-events:none;
+    transform:translateY(8px);
+    transition:opacity .18s ease, transform .18s ease;
+    padding:16px;
+  }
+  .drawer.open{ opacity:1; pointer-events:auto; transform:translateY(0); }
+  .drawer-head{ display:flex; align-items:center; justify-content:space-between; flex:0 0 auto; margin-bottom:10px; }
+  .drawer-tabs{ display:flex; gap:6px; }
+  .drawer-tab{
+    background:var(--key-fn); border:none; color:var(--muted);
+    border-radius:10px; padding:7px 10px; font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .drawer-tab.active{ background:var(--accent); color:var(--accent-fg); }
+  .drawer-body{
+    flex:1 1 auto; min-height:0; overflow-y:auto;
+    background:var(--display); border-radius:14px; padding:14px;
+    font-size:12.5px; line-height:1.7;
+  }
+  .drawer-body .dq{ color:var(--accent); font-weight:600; }
+  .drawer-body::-webkit-scrollbar{ width:5px; }
+  .drawer-body::-webkit-scrollbar-thumb{ background:var(--divider); border-radius:3px; }
+
+  .hist-item{
+    display:flex; justify-content:space-between; gap:8px;
+    padding:7px 0; border-bottom:1px solid var(--divider);
+    font-family:'JetBrains Mono', monospace; font-size:11.5px;
+  }
+  .hist-item:last-child{ border-bottom:none; }
+  .hist-item .tag{ color:var(--accent); font-size:10px; white-space:nowrap; }
+  .empty-note{ color:var(--muted); font-size:12px; }
+
+  table{ width:100%; border-collapse:collapse; font-family:'JetBrains Mono', monospace; font-size:11px; }
+  td, th{ text-align:left; padding:6px 4px; border-bottom:1px solid var(--divider); }
+  th{ color:var(--muted); font-weight:500; }
+
+  /* Quantity popover */
+  .qty-pop{
+    position:absolute; top:52px; left:16px; right:16px;
+    max-height:60%;
+    background:var(--display); border:1px solid var(--divider);
+    border-radius:14px; padding:6px;
+    display:none; flex-direction:column; gap:2px;
+    overflow-y:auto; z-index:5;
+    box-shadow:0 20px 40px -15px rgba(0,0,0,0.5);
+  }
+  .qty-pop.open{ display:flex; }
+  .qty-opt{
+    background:none; border:none; text-align:left; color:var(--sheet-fg);
+    font-size:13px; padding:9px 10px; border-radius:9px; cursor:pointer;
+    display:flex; justify-content:space-between;
+  }
+  .qty-opt:hover{ background:var(--key-fn); }
+  .qty-opt .u{ color:var(--muted); font-family:'JetBrains Mono', monospace; font-size:11px; }
+</style>
+</head>
+<body class="dark">
+<div class="app" id="appRoot">
+  <div class="topbar">
+    <button class="icon-btn" id="themeToggle" title="Theme">☀</button>
+    <button class="qty-select" id="qtySelect">
+      <span id="qtySelectLabel">Length</span>
+      <span class="chev">▾</span>
+    </button>
+    <button class="icon-btn" id="moreToggle" title="More">▾</button>
+  </div>
+
+  <div class="qty-pop" id="qtyPop"></div>
+
+  <div class="display">
+    <div class="disp-row1">
+      <span class="arrow-badge" id="dirBadge">m → cm</span>
+      <button class="swap-icon-btn" id="swapBtn">⇄</button>
+    </div>
+    <div class="disp-input-line"><span id="inputEcho">1</span></div>
+    <div class="disp-result-line">
+      <span id="cgsValue">100</span>
+      <span class="unit" id="outputUnitTag">cm</span>
+    </div>
+  </div>
+
+  <div class="keypad" id="keypad">
+    <button class="key fn dim" data-k="AC">AC</button>
+    <button class="key fn dim" data-k="back">⌫</button>
+    <button class="key fn dim" data-k="sign">±</button>
+    <button class="key fn dim" data-k="exp">10ⁿ</button>
+
+    <button class="key" data-k="7">7</button>
+    <button class="key" data-k="8">8</button>
+    <button class="key" data-k="9">9</button>
+    <button class="key fn" data-k="copy">⧉</button>
+
+    <button class="key" data-k="4">4</button>
+    <button class="key" data-k="5">5</button>
+    <button class="key" data-k="6">6</button>
+    <button class="key fn" data-k="prec-">−n</button>
+
+    <button class="key" data-k="1">1</button>
+    <button class="key" data-k="2">2</button>
+    <button class="key" data-k="3">3</button>
+    <button class="key fn" data-k="prec+">+n</button>
+
+    <button class="key wide" data-k="0">0</button>
+    <button class="key" data-k=".">.</button>
+    <button class="key accent" data-k="log">↵</button>
+  </div>
+
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <div class="drawer-tabs">
+        <button class="drawer-tab" data-t="formula" title="Formula">ƒ</button>
+        <button class="drawer-tab" data-t="history" title="History">🕘</button>
+        <button class="drawer-tab" data-t="table" title="Table">▤</button>
+      </div>
+      <button class="icon-btn" id="drawerClose">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+</div>
+
+<script>
+const quantities = [
+  { name:"Length", siUnit:"m", cgsUnit:"cm", factor:1e2,
+    deriv:"<span class='dq'>1 m = 100 cm</span> — centi- = 10⁻²." },
+  { name:"Mass", siUnit:"kg", cgsUnit:"g", factor:1e3,
+    deriv:"<span class='dq'>1 kg = 1000 g</span> — kilo- = 10³." },
+  { name:"Time", siUnit:"s", cgsUnit:"s", factor:1,
+    deriv:"Shared base unit — <span class='dq'>no conversion needed</span>." },
+  { name:"Force", siUnit:"N", cgsUnit:"dyn", factor:1e5,
+    deriv:"F = m·a → N = kg·m/s², dyn = g·cm/s².<br>1 N = 1000 g × 100 cm/s² = <span class='dq'>10⁵ dyn</span>." },
+  { name:"Energy", siUnit:"J", cgsUnit:"erg", factor:1e7,
+    deriv:"E = F·d → J = N·m, erg = dyn·cm.<br>1 J = 10⁵ dyn × 100 cm = <span class='dq'>10⁷ erg</span>." },
+  { name:"Pressure", siUnit:"Pa", cgsUnit:"Ba", factor:10,
+    deriv:"P = F/A → Pa = N/m², Ba = dyn/cm².<br>1 Pa = 10⁵ / 10⁴ = <span class='dq'>10 Ba</span>." },
+  { name:"Velocity", siUnit:"m/s", cgsUnit:"cm/s", factor:1e2,
+    deriv:"v = d/t, time unchanged → <span class='dq'>1 m/s = 100 cm/s</span>." },
+  { name:"Acceleration", siUnit:"m/s²", cgsUnit:"Gal", factor:1e2,
+    deriv:"a = d/t² → <span class='dq'>1 m/s² = 100 Gal</span>." },
+  { name:"Density", siUnit:"kg/m³", cgsUnit:"g/cm³", factor:1e-3,
+    deriv:"ρ = m/V → mass ×10³, volume ×10⁶.<br>1 kg/m³ = <span class='dq'>10⁻³ g/cm³</span>." },
+  { name:"Area", siUnit:"m²", cgsUnit:"cm²", factor:1e4,
+    deriv:"Length² → <span class='dq'>1 m² = 10⁴ cm²</span>." },
+  { name:"Volume", siUnit:"m³", cgsUnit:"cm³", factor:1e6,
+    deriv:"Length³ → <span class='dq'>1 m³ = 10⁶ cm³</span>." },
+  { name:"Power", siUnit:"W", cgsUnit:"erg/s", factor:1e7,
+    deriv:"P = E/t → <span class='dq'>1 W = 10⁷ erg/s</span> (energy factor)." },
+  { name:"Charge", siUnit:"C", cgsUnit:"statC", factor:2.9979e9,
+    deriv:"Gaussian esu definition.<br>1 C ≈ <span class='dq'>2.998×10⁹ statC</span> (≈ c in cm/s ÷ 10)." },
+  { name:"Viscosity", siUnit:"Pa·s", cgsUnit:"P", factor:10,
+    deriv:"Pressure × time, time unchanged.<br>1 Pa·s = <span class='dq'>10 Poise</span>." },
+  { name:"Magnetic flux density", siUnit:"T", cgsUnit:"G", factor:1e4,
+    deriv:"Gaussian EM definition → <span class='dq'>1 T = 10⁴ G</span>." },
+  { name:"Torque", siUnit:"N·m", cgsUnit:"dyn·cm", factor:1e7,
+    deriv:"τ = F·d, same form as energy.<br>1 N·m = <span class='dq'>10⁷ dyn·cm</span>." },
+  { name:"Momentum", siUnit:"kg·m/s", cgsUnit:"g·cm/s", factor:1e5,
+    deriv:"p = m·v → mass ×10³, velocity ×10².<br>1 kg·m/s = <span class='dq'>10⁵ g·cm/s</span>." },
+];
+
+let current = quantities[0];
+let direction = 1;
+let precision = 6;
+let history = [];
+let inputStr = "1";
+let drawerTab = "formula";
+
+const qtySelectLabel = document.getElementById('qtySelectLabel');
+const qtySelect = document.getElementById('qtySelect');
+const qtyPop = document.getElementById('qtyPop');
+const dirBadge = document.getElementById('dirBadge');
+const inputEcho = document.getElementById('inputEcho');
+const outputUnitTag = document.getElementById('outputUnitTag');
+const cgsValueEl = document.getElementById('cgsValue');
+const swapBtn = document.getElementById('swapBtn');
+const keypad = document.getElementById('keypad');
+const themeToggle = document.getElementById('themeToggle');
+const moreToggle = document.getElementById('moreToggle');
+const drawer = document.getElementById('drawer');
+const drawerClose = document.getElementById('drawerClose');
+const drawerBody = document.getElementById('drawerBody');
+const drawerTabs = document.querySelectorAll('.drawer-tab');
+
+function formatResult(n){
+  if (n === 0) return "0";
+  const abs = Math.abs(n);
+  if (abs !== 0 && (abs < 1e-4 || abs >= 1e8)) {
+    return n.toExponential(Math.max(precision-2,1)).replace('e+','e');
+  }
+  return parseFloat(n.toPrecision(precision)).toString();
+}
+
+function computeResult(){
+  const val = parseFloat(inputStr);
+  if (isNaN(val)) return 0;
+  return direction === 1 ? val * current.factor : val / current.factor;
+}
+
+function render(){
+  const fromUnit = direction === 1 ? current.siUnit : current.cgsUnit;
+  const toUnit = direction === 1 ? current.cgsUnit : current.siUnit;
+
+  qtySelectLabel.textContent = current.name;
+  dirBadge.textContent = `${fromUnit} → ${toUnit}`;
+  inputEcho.textContent = inputStr;
+  outputUnitTag.textContent = toUnit;
+  cgsValueEl.textContent = formatResult(computeResult());
+
+  if (drawer.classList.contains('open')) renderDrawer();
+}
+
+function renderDrawer(){
+  drawerTabs.forEach(t => t.classList.toggle('active', t.dataset.t === drawerTab));
+  if (drawerTab === 'formula'){
+    drawerBody.innerHTML = `<b>${current.name}</b><br><br>${current.deriv}`;
+  } else if (drawerTab === 'history'){
+    if (history.length === 0){
+      drawerBody.innerHTML = '<span class="empty-note">No conversions logged yet — tap ↵ to save one.</span>';
+    } else {
+      drawerBody.innerHTML = history.map(h =>
+        `<div class="hist-item"><span>${h.eq}</span><span class="tag">${h.name}</span></div>`
+      ).join('') + '<button class="key fn" id="clearHist" style="margin-top:10px;width:100%;height:34px;font-size:11px;">Clear</button>';
+      document.getElementById('clearHist').addEventListener('click', () => {
+        history = []; renderDrawer();
+      });
+    }
+  } else if (drawerTab === 'table'){
+    const rows = quantities.map(q =>
+      `<tr><td>${q.name}</td><td>${q.siUnit}</td><td>${q.cgsUnit}</td></tr>`
+    ).join('');
+    drawerBody.innerHTML = `<table><thead><tr><th>Qty</th><th>SI</th><th>CGS</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+}
+
+function logHistory(){
+  const val = parseFloat(inputStr);
+  if (isNaN(val)) return;
+  const fromUnit = direction === 1 ? current.siUnit : current.cgsUnit;
+  const toUnit = direction === 1 ? current.cgsUnit : current.siUnit;
+  const result = computeResult();
+  history.unshift({ name: current.name, eq: `${val}${fromUnit} = ${formatResult(result)}${toUnit}` });
+  history = history.slice(0, 6);
+  drawerTab = 'history';
+  drawer.classList.add('open');
+  renderDrawer();
+}
+
+// Build quantity popover
+quantities.forEach(q => {
+  const opt = document.createElement('button');
+  opt.className = 'qty-opt';
+  opt.innerHTML = `<span>${q.name}</span><span class="u">${q.siUnit} / ${q.cgsUnit}</span>`;
+  opt.addEventListener('click', () => {
+    current = q;
+    qtyPop.classList.remove('open');
+    render();
+  });
+  qtyPop.appendChild(opt);
+});
+
+qtySelect.addEventListener('click', () => qtyPop.classList.toggle('open'));
+
+function copyResult(){
+  const toUnit = direction === 1 ? current.cgsUnit : current.siUnit;
+  navigator.clipboard.writeText(`${cgsValueEl.textContent} ${toUnit}`).catch(()=>{});
+}
+
+keypad.addEventListener('click', (e) => {
+  const btn = e.target.closest('.key');
+  if (!btn) return;
+  const k = btn.dataset.k;
+
+  if (/^[0-9]$/.test(k)){
+    inputStr = (inputStr === "0") ? k : inputStr + k;
+  } else if (k === '.'){
+    if (!inputStr.includes('.')) inputStr += '.';
+  } else if (k === 'AC'){
+    inputStr = "0";
+  } else if (k === 'back'){
+    inputStr = inputStr.length > 1 ? inputStr.slice(0, -1) : "0";
+  } else if (k === 'sign'){
+    inputStr = inputStr.startsWith('-') ? inputStr.slice(1) : '-' + inputStr;
+  } else if (k === 'exp'){
+    inputStr = ((parseFloat(inputStr) || 0) * 10) + "";
+  } else if (k === 'copy'){
+    copyResult();
+    btn.style.background = 'var(--accent)';
+    setTimeout(() => btn.style.background = '', 300);
+  } else if (k === 'log'){
+    logHistory();
+  } else if (k === 'prec-'){
+    precision = Math.max(2, precision - 1);
+  } else if (k === 'prec+'){
+    precision = Math.min(10, precision + 1);
+  }
+  render();
+});
+
+swapBtn.addEventListener('click', () => {
+  direction *= -1;
+  swapBtn.classList.add('spin');
+  setTimeout(() => swapBtn.classList.remove('spin'), 200);
+  render();
+});
+
+themeToggle.addEventListener('click', () => {
+  const isLight = document.body.classList.toggle('light');
+  document.body.classList.toggle('dark', !isLight);
+  themeToggle.textContent = isLight ? '☾' : '☀';
+});
+
+moreToggle.addEventListener('click', () => {
+  drawer.classList.add('open');
+  renderDrawer();
+});
+drawerClose.addEventListener('click', () => drawer.classList.remove('open'));
+drawerTabs.forEach(t => t.addEventListener('click', () => {
+  drawerTab = t.dataset.t;
+  renderDrawer();
+}));
+
+document.addEventListener('click', (e) => {
+  if (!qtySelect.contains(e.target) && !qtyPop.contains(e.target)){
+    qtyPop.classList.remove('open');
+  }
+});
+
+drawerTab = 'formula';
+render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
